@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(1:*)",
+      "Bash(echo {})",
+      "Bash(printf 'y\\\\n')",
+      "Bash(npx create-vite@latest Balagan --template react-ts)",
+      "Bash(npm install:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm:*)",
+      "Bash(node_modules/.bin/vite --version)",
+      "Bash(ls C:/Users/User/Documents/Balagan/node_modules/.bin/vite*)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(node_modules/.bin/vite.cmd build:*)"
+    ]
+  }
+}
