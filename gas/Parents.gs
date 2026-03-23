@@ -116,7 +116,7 @@ function adminSaveParent(payload) {
     p.display_name || '',
     p.active !== false,
     p.notes || '',
-    rowIndex === -1 ? nowIso() : allData[rowIndex - 2][COL_P.CREATED_AT - 1],
+    rowIndex === -1 ? nowIso() : allData[rowIndex - 1][COL_P.CREATED_AT - 1],
   ];
 
   if (rowIndex === -1) {
@@ -152,12 +152,16 @@ function adminDeleteParent(payload) {
 
   var sheet   = getSheet(PARENTS_SHEET);
   var allData = sheet.getDataRange().getValues();
+  var deleted = false;
 
+  // לא break – מוחק את כל השורות עם אותו טלפון (כולל כפילויות)
   for (var i = 1; i < allData.length; i++) {
     if (normalizePhone(String(allData[i][0])) === phone) {
       sheet.getRange(i + 1, COL_P.ACTIVE).setValue(false);
-      return { deleted: true };
+      deleted = true;
     }
   }
-  throw new Error('הורה לא נמצא: ' + phone);
+
+  if (!deleted) throw new Error('הורה לא נמצא: ' + phone);
+  return { deleted: true };
 }
