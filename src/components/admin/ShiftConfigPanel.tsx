@@ -23,11 +23,11 @@ export function ShiftConfigPanel() {
   const [specialPhones, setSpecialPhones] = useState('')
   const [generatingCode, setGeneratingCode] = useState(false)
 
-  const load = async () => {
+  const load = async (date?: string) => {
     if (!adminSession) return
     setIsLoading(true)
     try {
-      const res = await adminGetDayConfig(adminSession.admin_token) as { config: DailyConfig }
+      const res = await adminGetDayConfig(adminSession.admin_token, date) as { config: DailyConfig }
       setConfig(res.config)
       setSpecialPhones((res.config.special_phone_list || []).join('\n'))
       setSpecialCode(res.config.special_parent_code || '')
@@ -60,6 +60,7 @@ export function ShiftConfigPanel() {
     if (!adminSession) return
     setIsSaving(true)
     setError(null)
+    const savedDate = config.date
     try {
       await adminSetDayConfig(adminSession.admin_token, {
         ...config,
@@ -67,6 +68,7 @@ export function ShiftConfigPanel() {
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
+      await load(savedDate) // טען מחדש מה-DB לאימות
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'שגיאה בשמירה')
     } finally {
@@ -117,9 +119,10 @@ export function ShiftConfigPanel() {
             className="input-field" />
         </div>
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">משך משמרת (דקות)</label>
-          <input type="number" value={config.shift_duration_min || 90} onChange={e => updateDuration(Number(e.target.value))}
-            className="input-field" min={30} max={300} />
+          <label className="text-sm text-gray-600 mb-1 block">משך משמרת (שעות)</label>
+          <input type="number" value={((config.shift_duration_min || 90) / 60).toFixed(1)}
+            onChange={e => updateDuration(Math.round(Number(e.target.value) * 60))}
+            className="input-field" min={0.5} max={5} step={0.5} />
         </div>
       </div>
 
