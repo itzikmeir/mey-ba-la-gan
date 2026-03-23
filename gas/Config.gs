@@ -10,12 +10,20 @@
 
 var CONFIG_SHEET = 'DailyConfig';
 
+// ── המר תא תאריך ל-yyyy-MM-dd (Sheets ממיר תאריכים לאובייקט Date) ──
+function cellToDateStr(cell) {
+  if (cell instanceof Date) {
+    return Utilities.formatDate(cell, 'Asia/Jerusalem', 'yyyy-MM-dd');
+  }
+  return String(cell || '').trim();
+}
+
 // ── Read config for a specific date ───────────────────────
 function getDailyConfigForDate(date) {
   var sheet   = getSheet(CONFIG_SHEET);
   var data    = sheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === date) {
+    if (cellToDateStr(data[i][0]) === date) {
       return rowToConfig(data[i]);
     }
   }
@@ -24,7 +32,7 @@ function getDailyConfigForDate(date) {
 
 function rowToConfig(row) {
   return {
-    date:                String(row[0] || '').trim(),
+    date:                cellToDateStr(row[0]),
     shift1: {
       name:     String(row[1] || 'משמרת בוקר').trim(),
       arrival:  String(row[2] || '').trim(),
@@ -144,7 +152,7 @@ function adminSetDayConfig(payload) {
   var existingCreatedAt = nowIso();
 
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === cfg.date) {
+    if (cellToDateStr(data[i][0]) === cfg.date) {
       rowIndex = i + 1;
       existingCreatedAt = data[i][14] || nowIso();
       break;
