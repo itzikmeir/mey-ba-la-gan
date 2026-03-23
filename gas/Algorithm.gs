@@ -182,7 +182,7 @@ function writeAssignmentsToSubmissions(date, assignments) {
 
   assignments.forEach(function(a) {
     for (var i = 1; i < allData.length; i++) {
-      if (String(allData[i][0]).trim() === date && String(allData[i][3]).trim() === a.child_id) {
+      if (cellToDateStr(allData[i][0]) === date && String(allData[i][3]).trim() === a.child_id) {
         sheet.getRange(i + 1, COL_S.ASSIGNED).setValue(a.assigned_shift);
         sheet.getRange(i + 1, COL_S.REASON).setValue(a.assignment_reason);
         sheet.getRange(i + 1, COL_S.UPDATED_AT).setValue(now);
@@ -197,7 +197,7 @@ function updateConfigStatus(date, status) {
   var sheet   = getSheet(CONFIG_SHEET);
   var allData = sheet.getDataRange().getValues();
   for (var i = 1; i < allData.length; i++) {
-    if (String(allData[i][0]).trim() === date) {
+    if (cellToDateStr(allData[i][0]) === date) {
       sheet.getRange(i + 1, 14).setValue(status); // column N = status
       sheet.getRange(i + 1, 16).setValue(nowIso()); // column P = updated_at
       return;

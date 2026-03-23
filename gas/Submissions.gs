@@ -21,7 +21,7 @@ function getSubmissionsForDate(date) {
   var sheet = getSheet(SUBMISSIONS_SHEET);
   var data  = sheet.getDataRange().getValues();
   return data.slice(1)
-    .filter(function(row) { return String(row[0]).trim() === date; })
+    .filter(function(row) { return cellToDateStr(row[0]) === date; })
     .map(rowToSubmission);
 }
 
@@ -31,7 +31,7 @@ function getSubmissionsForFamilyAndDate(familyId, date) {
 
 function rowToSubmission(row) {
   return {
-    date:              String(row[COL_S.DATE - 1] || ''),
+    date:              cellToDateStr(row[COL_S.DATE - 1]),
     family_id:         String(row[COL_S.FAMILY_ID - 1] || ''),
     phone:             String(row[COL_S.PHONE - 1] || ''),
     child_id:          String(row[COL_S.CHILD_ID - 1] || ''),
@@ -112,7 +112,7 @@ function parentSubmitPreference(payload) {
       var existingRowIndex = -1;
       var existingSubmittedAt = now;
       for (var i = 1; i < allData.length; i++) {
-        if (String(allData[i][0]).trim() === date && String(allData[i][3]).trim() === childId) {
+        if (cellToDateStr(allData[i][0]) === date && String(allData[i][3]).trim() === childId) {
           existingRowIndex = i + 1;
           existingSubmittedAt = String(allData[i][COL_S.SUBMITTED_AT - 1]) || now;
           break;
@@ -290,7 +290,7 @@ function adminGetSwapRequests(payload) {
   var requests = data.slice(1).map(function(row) {
     return {
       request_id:      String(row[0]),
-      date:            String(row[1]),
+      date:            cellToDateStr(row[1]),
       family_id:       String(row[2]),
       phone:           String(row[3]),
       child_id:        String(row[4]),
@@ -373,7 +373,7 @@ function applyAssignmentOverride(date, childId, newShift, reason) {
   var allData = sheet.getDataRange().getValues();
 
   for (var i = 1; i < allData.length; i++) {
-    if (String(allData[i][0]).trim() === date && String(allData[i][3]).trim() === childId) {
+    if (cellToDateStr(allData[i][0]) === date && String(allData[i][3]).trim() === childId) {
       sheet.getRange(i + 1, COL_S.ASSIGNED).setValue(newShift);
       sheet.getRange(i + 1, COL_S.REASON).setValue(reason);
       sheet.getRange(i + 1, COL_S.UPDATED_AT).setValue(nowIso());
