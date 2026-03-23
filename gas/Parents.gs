@@ -27,7 +27,7 @@ function findParentByFamilyId(familyId) {
 
 function rowToParent(row) {
   return {
-    phone:        String(row[COL_P.PHONE - 1] || '').trim(),
+    phone:        normalizePhone(String(row[COL_P.PHONE - 1] || '').trim()),
     family_id:    String(row[COL_P.FAMILY_ID - 1] || '').trim(),
     children:     parseJsonSafe(row[COL_P.CHILDREN - 1], []),
     display_name: String(row[COL_P.DISPLAY_NAME - 1] || '').trim(),
@@ -37,10 +37,50 @@ function rowToParent(row) {
   };
 }
 
-// ── Admin: get all parents ─────────────────────────────────
+// ── Admin: get all parents + סטטוס DB ─────────────────────
 function adminGetParents(payload) {
   validateAdminToken(payload.admin_token);
-  return { parents: getAllParents() };
+  return { parents: getAllParents(), last_db_update: getLastDbUpdate() };
+}
+
+// ── בדיקת כפילויות בכל הגיליון ────────────────────────────
+function adminCheckDuplicates(payload) {
+  validateAdminToken(payload.admin_token);
+  var parents = getAllParents().filter(function(p) { return p.active; });
+  var seen    = {};
+  var duplicates = [];
+
+  parents.forEach(function(p) {
+    var key = normalizePhone(p.phone);
+    if (!key) return;
+    if (seen[key]) {
+      duplicates.push({ phone: key, name: p.display_name });
+    } else {
+      seen[key] = true;
+    }
+  });
+
+  // בדיקת ילדים כפולים (אותו child_id בשתי משפחות שונות)
+  var childSeen = {};
+  var dupChildren = [];
+  parents.forEach(function(p) {
+    var children = parseJsonSafe(p.children, []);
+    children.forEach(function(c) {
+      if (!c.id) return;
+      if (childSeen[c.id]) {
+        dupChildren.push({ child_id: c.id, child_name: c.name, phone: p.phone });
+      } else {
+        childSeen[c.id] = true;
+      }
+    });
+  });
+
+  return {
+    duplicate_phones:   duplicates,
+    duplicate_children: dupChildren,
+    has_issues:         duplicates.length > 0 || dupChildren.length > 0,
+    last_db_update:     getLastDbUpdate(),
+  };
 }
 
 // ── Admin: save (create or update) parent ─────────────────
@@ -80,10 +120,21 @@ function adminSaveParent(payload) {
   ];
 
   if (rowIndex === -1) {
+    // בדוק כפילות לפני הוספה
+    var existing = findParentByPhone(p.phone);
+    if (existing && existing.active) {
+      throw new Error('מספר טלפון ' + p.phone + ' כבר רשום עבור: ' + existing.display_name + '. לעדכון הורה קיים, ערוך אותו ישירות.');
+    }
+    // כתוב כטקסט (מונע את Sheets מלהסיר את ה-0)
     sheet.appendRow(row);
+    var newRowIndex = sheet.getLastRow();
+    sheet.getRange(newRowIndex, COL_P.PHONE).setNumberFormat('@');
   } else {
     sheet.getRange(rowIndex, 1, 1, row.length).setValues([row]);
+    sheet.getRange(rowIndex, COL_P.PHONE).setNumberFormat('@');
   }
+
+  markDbUpdated();
 
   // Update rotation tracking for new children
   children.forEach(function(c) {

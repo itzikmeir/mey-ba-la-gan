@@ -77,6 +77,11 @@ function setupAllSheets() {
     // התאם רוחב עמודות אוטומטי
     sheet.autoResizeColumns(1, headers.length);
 
+    // פורמט עמודת טלפון כטקסט (מונע Google Sheets מלהוריד את ה-0)
+    if (sheetName === 'Parents' || sheetName === 'Submissions' || sheetName === 'SwapRequests') {
+      sheet.getRange(2, 1, 1000, 1).setNumberFormat('@');
+    }
+
     log.push('   → ' + headers.length + ' כותרות הוגדרו');
   });
 

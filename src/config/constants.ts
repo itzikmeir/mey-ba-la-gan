@@ -2,7 +2,7 @@
 // Replace with your actual deployed GAS URL after setup
 export const GAS_URL = import.meta.env.VITE_GAS_URL || 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec'
 
-export const APP_NAME = 'מי בה לה גן'
+export const APP_NAME = 'מי בא לה גן'
 
 export const SHIFTS = {
   shift1: { label: 'משמרת בוקר', color: 'blue' },

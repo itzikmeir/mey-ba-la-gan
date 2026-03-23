@@ -1,16 +1,21 @@
-/** Normalize Israeli phone numbers to 0XXXXXXXXX format */
+/** Normalize Israeli phone numbers to 0XXXXXXXXX format.
+ *  Handles: 052..., +972-52..., 97252..., 0052..., and
+ *  9-digit numbers without leading 0 (as stored by Google Sheets). */
 export function normalizePhone(phone: string): string {
-  let p = phone.replace(/\D/g, '')
-  if (p.startsWith('972')) p = '0' + p.slice(3)
+  let p = String(phone).replace(/\D/g, '')
   if (p.startsWith('00972')) p = '0' + p.slice(5)
+  else if (p.startsWith('972')) p = '0' + p.slice(3)
+  // Google Sheets strips leading 0 from numeric cells:
+  // 9-digit mobile (5X/7X without leading 0) → add 0
+  else if (p.length === 9 && /^[57]/.test(p)) p = '0' + p
+  // 8-digit landline (2/3/4/8/9 without leading 0) → add 0
+  else if (p.length === 8 && /^[2-489]/.test(p)) p = '0' + p
   return p
 }
 
 /** Validate Israeli mobile / landline */
 export function isValidIsraeliPhone(phone: string): boolean {
   const normalized = normalizePhone(phone)
-  // Mobile: 05X, 07X (8 digits after 0)
-  // Landline: 02, 03, 04, 08, 09 (7 digits after 0)
   return /^0(5[0-9]|7[2-9])\d{7}$/.test(normalized) ||
          /^0[2-489]\d{7}$/.test(normalized)
 }

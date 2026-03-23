@@ -47,12 +47,30 @@ function parseJsonSafe(str, fallback) {
 }
 
 // ── טלפון ─────────────────────────────────────────────────
+// מטפל ב: 052..., +972-52..., 97252..., 0052...,
+// וגם במספרים ללא 0 בהתחלה (כפי ש-Google Sheets שומר מספרים)
 function normalizePhone(phone) {
-  if (!phone) return '';
+  if (!phone && phone !== 0) return '';
   var p = String(phone).replace(/\D/g, '');
-  if (p.startsWith('972')) p = '0' + p.slice(3);
-  if (p.startsWith('00972')) p = '0' + p.slice(5);
+  if (p.startsWith('00972'))      p = '0' + p.slice(5);
+  else if (p.startsWith('972'))   p = '0' + p.slice(3);
+  // Google Sheets מוריד 0 מתחילת מספרים:
+  // נייד ישראלי 9 ספרות (5X/7X) ← הוסף 0
+  else if (p.length === 9 && /^[57]/.test(p)) p = '0' + p;
+  // קווי ישראלי 8 ספרות (2/3/4/8/9) ← הוסף 0
+  else if (p.length === 8 && /^[2-489]/.test(p)) p = '0' + p;
   return p;
+}
+
+// ── עדכון חותמת זמן בסיס נתונים ──────────────────────────
+function markDbUpdated() {
+  try {
+    PropertiesService.getScriptProperties().setProperty('LAST_DB_UPDATE', nowIso());
+  } catch (e) { /* swallow */ }
+}
+
+function getLastDbUpdate() {
+  return PropertiesService.getScriptProperties().getProperty('LAST_DB_UPDATE') || '';
 }
 
 function phoneToWaId(phone) {

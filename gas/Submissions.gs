@@ -146,6 +146,7 @@ function parentSubmitPreference(payload) {
       }
     });
 
+    markDbUpdated();
     return { submitted: true, child_ids: savedIds, submitted_at: now };
 
   } finally {

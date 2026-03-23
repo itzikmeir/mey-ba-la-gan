@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { adminGetParents, adminSaveParent, adminDeleteParent } from '../../api/gasClient'
 import { useAppStore } from '../../store/useAppStore'
 import { ErrorBanner } from '../shared/ErrorBanner'
@@ -7,30 +7,50 @@ import { ConfirmModal } from '../shared/ConfirmModal'
 import { normalizePhone, formatPhone, isValidIsraeliPhone } from '../../utils/phoneNormalizer'
 import type { Parent, Child } from '../../types'
 
+interface ParentsResponse {
+  parents: Parent[]
+  last_db_update: string
+}
+
 export function ParentManagement() {
   const adminSession = useAppStore(s => s.adminSession)
-  const [parents, setParents]   = useState<Parent[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError]       = useState<string | null>(null)
+  const [parents, setParents]       = useState<Parent[]>([])
+  const [lastUpdate, setLastUpdate] = useState<string>('')
+  const [isLoading, setIsLoading]   = useState(true)
+  const [error, setError]           = useState<string | null>(null)
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null)
   const [editParent, setEditParent] = useState<Partial<Parent> | null>(null)
   const [deletePhone, setDeletePhone] = useState<string | null>(null)
-  const [search, setSearch]     = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const [search, setSearch]         = useState('')
+  const [isSaving, setIsSaving]     = useState(false)
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!adminSession) return
     setIsLoading(true)
     try {
-      const res = await adminGetParents(adminSession.admin_token) as { parents: Parent[] }
+      const res = await adminGetParents(adminSession.admin_token) as ParentsResponse
       setParents(res.parents)
+      if (res.last_db_update) setLastUpdate(res.last_db_update)
+
+      // בדיקת כפילויות אוטומטית
+      const phones = res.parents.filter(p => p.active).map(p => normalizePhone(p.phone))
+      const seen = new Set<string>()
+      const dups: string[] = []
+      phones.forEach(ph => { if (seen.has(ph)) dups.push(ph); else seen.add(ph) })
+      setDuplicateWarning(dups.length > 0 ? `⚠️ נמצאו מספרי טלפון כפולים: ${dups.join(', ')}` : null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'שגיאה')
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [adminSession])
 
-  useEffect(() => { load() }, [adminSession]) // eslint-disable-line
+  // רענון אוטומטי כל 30 שניות
+  useEffect(() => {
+    load()
+    const interval = setInterval(load, 30000)
+    return () => clearInterval(interval)
+  }, [load])
 
   const handleSave = async () => {
     if (!adminSession || !editParent) return
@@ -74,6 +94,21 @@ export function ParentManagement() {
   return (
     <div className="space-y-4">
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
+
+      {/* חיווי עדכון DB + כפילויות */}
+      <div className="flex items-center justify-between text-xs text-gray-400 px-1">
+        <button onClick={load} className="hover:text-gray-600 transition-colors">🔄 רענן</button>
+        {lastUpdate && (
+          <span>עודכן: {lastUpdate.replace('T', ' ').slice(0, 16)}</span>
+        )}
+      </div>
+      {duplicateWarning && (
+        <div className="bg-red-50 border border-red-300 rounded-xl p-3 text-sm text-red-700 font-medium">
+          {duplicateWarning}
+          <p className="text-xs font-normal mt-1">אנא מחק את הרשומות הכפולות כדי למנוע בעיות כניסה</p>
+        </div>
+      )}
+
 
       {/* Search + Add */}
       <div className="flex gap-2">

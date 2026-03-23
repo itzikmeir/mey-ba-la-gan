@@ -7,7 +7,7 @@
 
 // ── בדיקת חיים (GET) ──────────────────────────────────────
 function doGet(e) {
-  return buildResponse({ status: 'ok', app: 'מי בה לה גן' });
+  return buildResponse({ status: 'ok', app: 'מי בא לה גן' });
 }
 
 // ── ראוטר ראשי (POST) ─────────────────────────────────────
@@ -45,6 +45,7 @@ function doPost(e) {
     if (action === 'admin.sendReminders')       return buildResponse(adminSendReminders(payload));
     if (action === 'admin.getHistory')          return buildResponse(adminGetHistory(payload));
     if (action === 'admin.getRotationStats')    return buildResponse(adminGetRotationStats(payload));
+    if (action === 'admin.checkDuplicates')     return buildResponse(adminCheckDuplicates(payload));
 
     return buildError('UNKNOWN_ACTION', 'פעולה לא מוכרת: ' + action);
 
