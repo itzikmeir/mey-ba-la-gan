@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void
 }
 
-export function SwapRequestForm({ childId, childName, currentShift, date, onClose }: Props) {
+export function SwapRequestForm({ childId, childName, currentShift, date: _date, onClose }: Props) {
   const session        = useAppStore(s => s.session)
   const [reason, setReason]   = useState('')
   const [isLoading, setIsLoading] = useState(false)

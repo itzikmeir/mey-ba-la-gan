@@ -59,7 +59,7 @@ export default function LoginPage() {
         <h2 className="font-bold text-gray-800 text-xl mb-1 text-right">כניסת הורים</h2>
         <p className="text-gray-500 text-sm mb-5 text-right">הכנס/י את מספר הטלפון הרשום במערכת</p>
 
-        {error && <ErrorBanner message={error} onDismiss={() => setError(null)} className="mb-4" />}
+        {error && <div className="mb-4"><ErrorBanner message={error} onDismiss={() => setError(null)} /></div>}
 
         <div className="mb-4">
           <label className="text-sm font-medium text-gray-700 block mb-1 text-right">מספר טלפון</label>

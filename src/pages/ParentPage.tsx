@@ -70,7 +70,7 @@ export default function ParentPage() {
 
   return (
     <AppShell>
-      {error && <ErrorBanner message={error} onDismiss={() => setError(null)} className="mb-4" />}
+      {error && <div className="mb-4"><ErrorBanner message={error} onDismiss={() => setError(null)} /></div>}
 
       {/* No config yet */}
       {!dayInfo || dayInfo.status === 'draft' ? (

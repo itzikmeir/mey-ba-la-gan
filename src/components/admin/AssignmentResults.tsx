@@ -4,7 +4,6 @@ import { useAppStore } from '../../store/useAppStore'
 import { ConfirmModal } from '../shared/ConfirmModal'
 import { ErrorBanner } from '../shared/ErrorBanner'
 import { LoadingSpinner } from '../shared/LoadingSpinner'
-import type { Submission } from '../../types'
 
 interface AssignmentData {
   assignments: Array<{ child_id: string; child_name: string; assigned_shift: string; assignment_reason: string }>

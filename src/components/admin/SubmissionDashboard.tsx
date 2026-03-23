@@ -59,7 +59,7 @@ export function SubmissionDashboard() {
   if (isLoading) return <div className="flex justify-center py-8"><LoadingSpinner /></div>
   if (!data) return null
 
-  const submitted = data.submissions.filter(s => s.preference_1 !== '')
+  const submitted = data.submissions.filter(s => !!s.preference_1)
   const absent    = data.submissions.filter(s => s.preference_1 === 'absent')
   const active    = submitted.filter(s => s.preference_1 !== 'absent')
 

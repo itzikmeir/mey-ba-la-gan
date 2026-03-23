@@ -124,15 +124,15 @@ export function ParentManagement() {
               <label className="text-sm text-gray-600 mb-1 block text-right">ילדים</label>
               {(editParent.children as Child[] || []).map((c, i) => (
                 <div key={i} className="flex gap-2 mb-2">
-                  <button onClick={() => setEditParent(p => ({ ...p, children: (p.children as Child[]).filter((_, j) => j !== i) }))}
+                  <button onClick={() => setEditParent(p => p ? ({ ...p, children: (p.children as Child[]).filter((_, j) => j !== i) }) : p)}
                     className="text-red-400 hover:text-red-600 px-2">×</button>
                   <input value={c.name} onChange={e => setEditParent(p => ({
                     ...p,
-                    children: (p.children as Child[]).map((ch, j) => j === i ? { ...ch, name: e.target.value } : ch)
+                    children: (p?.children as Child[] || []).map((ch, j) => j === i ? { ...ch, name: e.target.value } : ch)
                   }))} className="input-field flex-1" placeholder="שם ילד/ה" />
                 </div>
               ))}
-              <button onClick={() => setEditParent(p => ({ ...p, children: [...(p.children as Child[] || []), { id: crypto.randomUUID(), name: '' }] }))}
+              <button onClick={() => setEditParent(p => p ? ({ ...p, children: [...(p.children as Child[] || []), { id: crypto.randomUUID(), name: '' }] }) : p)}
                 className="text-primary-600 text-sm underline">+ הוסף ילד</button>
             </div>
 
