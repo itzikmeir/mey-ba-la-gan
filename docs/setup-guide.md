@@ -102,7 +102,7 @@
    git init
    git add .
    git commit -m "first commit"
-   git remote add origin https://github.com/YOUR_USERNAME/mey-ba-la-gan.git
+   git remote add origin https://github.com/itzikmeir/mey-ba-la-gan.git
    git push -u origin main
    ```
 
@@ -113,7 +113,7 @@
      - ערך: כתובת ה-Apps Script Web App
 
 4. הגיוס יתחיל אוטומטית. לאחר כ-2 דקות האפליקציה תהיה זמינה ב:
-   `https://YOUR_USERNAME.github.io/mey-ba-la-gan/`
+   `https://itzikmeir.github.io/mey-ba-la-gan/`
 
 ---
 
