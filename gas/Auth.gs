@@ -115,12 +115,4 @@ function requireParentAuth(payload) {
   return parent;
 }
 
-// ── Helpers ───────────────────────────────────────────────
-function parseJsonSafe(str, fallback) {
-  try {
-    if (typeof str === 'object') return str;
-    return JSON.parse(str);
-  } catch (e) {
-    return fallback;
-  }
-}
+// parseJsonSafe מוגדרת ב-Utils.gs
